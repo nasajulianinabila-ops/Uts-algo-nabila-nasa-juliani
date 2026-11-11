@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kalkulator</title>
+<style>
+body{font-family:sans-serif;display:flex;justify-content:center;margin:0;padding:16px}
+.calc{width:280px}
+#display{width:100%;box-sizing:border-box;font-size:28px;text-align:right;padding:12px;margin-bottom:8px}
+.keys{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+button{font-size:20px;padding:14px;cursor:pointer}
+.wide{grid-column:span 2}
+</style>
+</head>
+<body>
+<div class="calc">
+  <input id="display" value="0" readonly>
+  <div class="keys">
+    <button onclick="clearAll()">C</button>
+    <button onclick="back()">⌫</button>
+    <button onclick="setOp('/')">÷</button>
+    <button onclick="setOp('*')">×</button>
+    <button onclick="num('7')">7</button>
+    <button onclick="num('8')">8</button>
+    <button onclick="num('9')">9</button>
+    <button onclick="setOp('-')">−</button>
+    <button onclick="num('4')">4</button>
+    <button onclick="num('5')">5</button>
+    <button onclick="num('6')">6</button>
+    <button onclick="setOp('+')">+</button>
+    <button onclick="num('1')">1</button>
+    <button onclick="num('2')">2</button>
+    <button onclick="num('3')">3</button>
+    <button onclick="calc()">=</button>
+    <button class="wide" onclick="num('0')">0</button>
+    <button onclick="dot()">.</button>
+  </div>
+</div>
+<script>
+let cur = "0", prev = null, op = null, reset = false;
+const disp = document.getElementById("display");
+function show(){ disp.value = cur; }
+function num(n){
+  if (reset || cur === "0"){ cur = n; reset = false; }
+  else cur += n;
+  show();
+}
+function dot(){
+  if (reset){ cur = "0"; reset = false; }
+  if (!cur.includes(".")) cur += ".";
+  show();
+}
+function setOp(o){
+  if (cur === "Error") return;
+  if (op && !reset) calc();
+  prev = parseFloat(cur);
+  op = o;
+  reset = true;
+}
+function calc(){
+  if (op === null) return;
+  const b = parseFloat(cur);
+  let r;
+  if (op === "+") r = prev + b;
+  else if (op === "-") r = prev - b;
+  else if (op === "*") r = prev * b;
+  else if (op === "/") r = b === 0 ? "Error" : prev / b;
+  cur = r === "Error" ? "Error" : String(+r.toFixed(10));
+  op = null;
+  reset = true;
+  show();
+}
+function back(){
+  if (reset) return;
+  cur = cur.length > 1 ? cur.slice(0, -1) : "0";
+  show();
+}
+function clearAll(){
+  cur = "0"; prev = null; op = null; reset = false;
+  show();
+}
+</script>
+</body>
+</html>
