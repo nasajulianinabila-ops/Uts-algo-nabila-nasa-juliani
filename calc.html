@@ -5,48 +5,70 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Kalkulator</title>
 <style>
-body{font-family:sans-serif;display:flex;justify-content:center;margin:0;padding:16px}
-.calc{width:280px}
-#display{width:100%;box-sizing:border-box;font-size:28px;text-align:right;padding:12px;margin-bottom:8px}
-.keys{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-button{font-size:20px;padding:14px;cursor:pointer}
-.wide{grid-column:span 2}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;min-height:100vh;display:flex;justify-content:center;align-items:center;background:#0f1115;font-family:system-ui,sans-serif}
+.calc{width:min(92vw,360px);background:#000;border-radius:28px;padding:18px;box-shadow:0 12px 40px rgba(0,0,0,.6)}
+.screen{height:120px;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-end;padding:8px 10px;color:#fff;overflow:hidden}
+#expr{font-size:16px;color:#8e8e93;min-height:22px}
+#out{font-size:56px;font-weight:300;line-height:1.1;white-space:nowrap}
+.keys{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:10px}
+button{border:0;border-radius:50%;aspect-ratio:1;font-size:26px;color:#fff;background:#333;cursor:pointer;transition:filter .1s}
+button:active{filter:brightness(1.5)}
+.fn{background:#a5a5a5;color:#000}
+.op{background:#ff9f0a}
+.zero{grid-column:span 2;aspect-ratio:auto;border-radius:40px;text-align:left;padding-left:28px}
 </style>
 </head>
 <body>
 <div class="calc">
-  <input id="display" value="0" readonly>
+  <div class="screen">
+    <div id="expr"></div>
+    <div id="out">0</div>
+  </div>
   <div class="keys">
-    <button onclick="clearAll()">C</button>
-    <button onclick="back()">⌫</button>
-    <button onclick="setOp('/')">÷</button>
-    <button onclick="setOp('*')">×</button>
+    <button class="fn" onclick="clearAll()">AC</button>
+    <button class="fn" onclick="back()">⌫</button>
+    <button class="fn" onclick="percent()">%</button>
+    <button class="op" onclick="setOp('/')">÷</button>
+
     <button onclick="num('7')">7</button>
     <button onclick="num('8')">8</button>
     <button onclick="num('9')">9</button>
-    <button onclick="setOp('-')">−</button>
+    <button class="op" onclick="setOp('*')">×</button>
+
     <button onclick="num('4')">4</button>
     <button onclick="num('5')">5</button>
     <button onclick="num('6')">6</button>
-    <button onclick="setOp('+')">+</button>
+    <button class="op" onclick="setOp('-')">−</button>
+
     <button onclick="num('1')">1</button>
     <button onclick="num('2')">2</button>
     <button onclick="num('3')">3</button>
-    <button onclick="calc()">=</button>
-    <button class="wide" onclick="num('0')">0</button>
+    <button class="op" onclick="setOp('+')">+</button>
+
+    <button class="zero" onclick="num('0')">0</button>
     <button onclick="dot()">.</button>
+    <button class="op" onclick="calc()">=</button>
   </div>
 </div>
 <script>
 let cur = "0", prev = null, op = null, reset = false;
-const disp = document.getElementById("display");
-function show(){ disp.value = cur; }
+const out = document.getElementById("out");
+const expr = document.getElementById("expr");
+const sym = {"+":"+","-":"−","*":"×","/":"÷"};
+
+function show(){
+  out.textContent = cur;
+  out.style.fontSize = cur.length > 12 ? "28px" : cur.length > 8 ? "40px" : "56px";
+}
 function num(n){
+  if (cur === "Error") clearAll();
   if (reset || cur === "0"){ cur = n; reset = false; }
   else cur += n;
   show();
 }
 function dot(){
+  if (cur === "Error") clearAll();
   if (reset){ cur = "0"; reset = false; }
   if (!cur.includes(".")) cur += ".";
   show();
@@ -57,29 +79,45 @@ function setOp(o){
   prev = parseFloat(cur);
   op = o;
   reset = true;
+  expr.textContent = prev + " " + sym[o];
 }
 function calc(){
-  if (op === null) return;
+  if (op === null || cur === "Error") return;
   const b = parseFloat(cur);
   let r;
   if (op === "+") r = prev + b;
   else if (op === "-") r = prev - b;
   else if (op === "*") r = prev * b;
-  else if (op === "/") r = b === 0 ? "Error" : prev / b;
+  else r = b === 0 ? "Error" : prev / b;
+  expr.textContent = prev + " " + sym[op] + " " + b + " =";
   cur = r === "Error" ? "Error" : String(+r.toFixed(10));
   op = null;
   reset = true;
   show();
 }
+function percent(){
+  if (cur === "Error") return;
+  cur = String(+(parseFloat(cur) / 100).toFixed(10));
+  show();
+}
 function back(){
-  if (reset) return;
+  if (reset || cur === "Error") return;
   cur = cur.length > 1 ? cur.slice(0, -1) : "0";
   show();
 }
 function clearAll(){
   cur = "0"; prev = null; op = null; reset = false;
+  expr.textContent = "";
   show();
 }
+document.addEventListener("keydown", e => {
+  if (e.key >= "0" && e.key <= "9") num(e.key);
+  else if (e.key === ".") dot();
+  else if ("+-*/".includes(e.key)) setOp(e.key);
+  else if (e.key === "Enter" || e.key === "=") calc();
+  else if (e.key === "Backspace") back();
+  else if (e.key === "Escape") clearAll();
+});
 </script>
 </body>
 </html>
