@@ -1,123 +1,115 @@
 <!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kalkulator</title>
+<html lang="id"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scientific Calculator</title>
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;min-height:100vh;display:flex;justify-content:center;align-items:center;background:#0f1115;font-family:system-ui,sans-serif}
-.calc{width:min(92vw,360px);background:#000;border-radius:28px;padding:18px;box-shadow:0 12px 40px rgba(0,0,0,.6)}
-.screen{height:120px;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-end;padding:8px 10px;color:#fff;overflow:hidden}
-#expr{font-size:16px;color:#8e8e93;min-height:22px}
-#out{font-size:56px;font-weight:300;line-height:1.1;white-space:nowrap}
-.keys{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:10px}
-button{border:0;border-radius:50%;aspect-ratio:1;font-size:26px;color:#fff;background:#333;cursor:pointer;transition:filter .1s}
-button:active{filter:brightness(1.5)}
-.fn{background:#a5a5a5;color:#000}
-.op{background:#ff9f0a}
-.zero{grid-column:span 2;aspect-ratio:auto;border-radius:40px;text-align:left;padding-left:28px}
-</style>
-</head>
-<body>
-<div class="calc">
-  <div class="screen">
-    <div id="expr"></div>
-    <div id="out">0</div>
-  </div>
-  <div class="keys">
-    <button class="fn" onclick="clearAll()">AC</button>
-    <button class="fn" onclick="back()">⌫</button>
-    <button class="fn" onclick="percent()">%</button>
-    <button class="op" onclick="setOp('/')">÷</button>
+*{box-sizing:border-box}
+body{margin:0;padding:12px;background:#000;color:#fff;font-family:sans-serif}
+h2{text-align:center;font-size:16px;margin:4px 0 10px}
+h3{font-size:12px;letter-spacing:1px;color:#aaa;margin:16px 0 6px}
+#layar{text-align:right;padding:6px;min-height:100px}
+#ekspr{color:#aaa;font-size:16px;min-height:22px;word-break:break-all}
+#hasil{font-size:44px;word-break:break-all}
+.bar{display:flex;gap:8px}
+.bar button{flex:1;border:0;border-radius:20px;padding:10px;background:#333;color:#fff;font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.grid.f{grid-template-columns:repeat(5,1fr)}
+.grid button{border:0;border-radius:40px;padding:15px 0;font-size:17px;background:#333;color:#fff}
+.grid button.ut{background:#a5a5a5;color:#000}
+.grid button.op{background:#ff9f0a}
+.grid button.dua{grid-column:span 2}
+#riwayat{list-style:none;padding:0;margin:0;color:#ccc;font-size:14px}
+#riwayat li{padding:6px 0;border-bottom:1px solid #222;word-break:break-all}
+.hapus{background:none;border:1px solid #555;color:#fff;border-radius:10px;padding:2px 10px;margin-left:8px}
+</style></head><body>
 
-    <button onclick="num('7')">7</button>
-    <button onclick="num('8')">8</button>
-    <button onclick="num('9')">9</button>
-    <button class="op" onclick="setOp('*')">×</button>
-
-    <button onclick="num('4')">4</button>
-    <button onclick="num('5')">5</button>
-    <button onclick="num('6')">6</button>
-    <button class="op" onclick="setOp('-')">−</button>
-
-    <button onclick="num('1')">1</button>
-    <button onclick="num('2')">2</button>
-    <button onclick="num('3')">3</button>
-    <button class="op" onclick="setOp('+')">+</button>
-
-    <button class="zero" onclick="num('0')">0</button>
-    <button onclick="dot()">.</button>
-    <button class="op" onclick="calc()">=</button>
-  </div>
+<h2>SCIENTIFIC CALCULATOR</h2>
+<div id="layar"><div id="ekspr"></div><div id="hasil">0</div></div>
+<div class="bar">
+  <button id="mode" onclick="ganti()">DEG</button>
+  <button onclick="salin()">SALIN HASIL</button>
 </div>
-<script>
-let cur = "0", prev = null, op = null, reset = false;
-const out = document.getElementById("out");
-const expr = document.getElementById("expr");
-const sym = {"+":"+","-":"−","*":"×","/":"÷"};
 
-function show(){
-  out.textContent = cur;
-  out.style.fontSize = cur.length > 12 ? "28px" : cur.length > 8 ? "40px" : "56px";
-}
-function num(n){
-  if (cur === "Error") clearAll();
-  if (reset || cur === "0"){ cur = n; reset = false; }
-  else cur += n;
-  show();
-}
-function dot(){
-  if (cur === "Error") clearAll();
-  if (reset){ cur = "0"; reset = false; }
-  if (!cur.includes(".")) cur += ".";
-  show();
-}
-function setOp(o){
-  if (cur === "Error") return;
-  if (op && !reset) calc();
-  prev = parseFloat(cur);
-  op = o;
-  reset = true;
-  expr.textContent = prev + " " + sym[o];
-}
-function calc(){
-  if (op === null || cur === "Error") return;
-  const b = parseFloat(cur);
-  let r;
-  if (op === "+") r = prev + b;
-  else if (op === "-") r = prev - b;
-  else if (op === "*") r = prev * b;
-  else r = b === 0 ? "Error" : prev / b;
-  expr.textContent = prev + " " + sym[op] + " " + b + " =";
-  cur = r === "Error" ? "Error" : String(+r.toFixed(10));
-  op = null;
-  reset = true;
-  show();
-}
-function percent(){
-  if (cur === "Error") return;
-  cur = String(+(parseFloat(cur) / 100).toFixed(10));
-  show();
-}
-function back(){
-  if (reset || cur === "Error") return;
-  cur = cur.length > 1 ? cur.slice(0, -1) : "0";
-  show();
-}
-function clearAll(){
-  cur = "0"; prev = null; op = null; reset = false;
-  expr.textContent = "";
-  show();
-}
-document.addEventListener("keydown", e => {
-  if (e.key >= "0" && e.key <= "9") num(e.key);
-  else if (e.key === ".") dot();
-  else if ("+-*/".includes(e.key)) setOp(e.key);
-  else if (e.key === "Enter" || e.key === "=") calc();
-  else if (e.key === "Backspace") back();
-  else if (e.key === "Escape") clearAll();
+<h3>FUNGSI ILMIAH</h3><div class="grid f" id="ilmiah"></div>
+<h3>OPERATOR PERHITUNGAN</h3><div class="grid" id="oper"></div>
+<h3>OPERATOR PERBANDINGAN</h3><div class="grid" id="banding"></div>
+<h3>RIWAYAT PERHITUNGAN <button class="hapus" onclick="hapus()">Hapus</button></h3>
+<ul id="riwayat"><li>Belum ada riwayat.</li></ul>
+
+<script>
+let teks='', ans=0, deg=true, riw=[];
+const $=id=>document.getElementById(id);
+
+const grup={
+ ilmiah:[['sin','sin('],['cos','cos('],['tan','tan('],['sin⁻¹','asin('],['cos⁻¹','acos('],
+  ['tan⁻¹','atan('],['√','sqrt('],['∛','cbrt('],['x²','**2'],['x³','**3'],
+  ['log','log('],['ln','ln('],['x!','!'],['π','PI'],['e','E']],
+ oper:[['AC','AC','ut'],['DEL','DEL','ut'],['(','(','ut'],[')',')','ut'],
+  ['7','7'],['8','8'],['9','9'],['÷','/','op'],
+  ['4','4'],['5','5'],['6','6'],['×','*','op'],
+  ['1','1'],['2','2'],['3','3'],['−','-','op'],
+  ['0','0'],['.','.'],['mod','%','op'],['+','+','op'],
+  ['xʸ','**','op'],['Ans','ans','op'],['=','=','op dua']],
+ banding:[['>','>'],['<','<'],['>=','>='],['<=','<='],
+  ['==','=='],['===','==='],['!=','!='],['!==','!==']]
+};
+for(const g in grup) grup[g].forEach(([t,v,c])=>{
+  const b=document.createElement('button');
+  b.textContent=t; if(c) b.className=c;
+  b.onclick=()=>tekan(v);
+  $(g).appendChild(b);
 });
+
+function cantik(s){
+  return s.replace(/\*\*2/g,'²').replace(/\*\*3/g,'³').replace(/\*\*/g,'^')
+   .replace(/asin/g,'sin⁻¹').replace(/acos/g,'cos⁻¹').replace(/atan/g,'tan⁻¹')
+   .replace(/sqrt/g,'√').replace(/cbrt/g,'∛')
+   .replace(/PI/g,'π').replace(/E/g,'e')
+   .replace(/\*/g,'×').replace(/\//g,'÷').replace(/%/g,' mod ');
+}
+function tekan(v){
+  if(v==='AC'){teks='';$('hasil').textContent='0';}
+  else if(v==='DEL'){
+    const m=teks.match(/(asin\(|acos\(|atan\(|sqrt\(|cbrt\(|sin\(|cos\(|tan\(|log\(|ln\(|PI|ans|\*\*2|\*\*3|\*\*|===|!==|==|!=|>=|<=|.)$/);
+    teks=m?teks.slice(0,-m[0].length):'';
+  }
+  else if(v==='=') return hitung();
+  else teks+=v;
+  $('ekspr').textContent=cantik(teks);
+}
+function ganti(){deg=!deg;$('mode').textContent=deg?'DEG':'RAD';}
+function hitung(){
+  if(!teks) return;
+  try{
+    const r=x=>deg?x*Math.PI/180:x, d=x=>deg?x*180/Math.PI:x;
+    const fact=n=>{if(n<0||!Number.isInteger(n))throw 0;let h=1;for(let i=2;i<=n;i++)h*=i;return h;};
+    const f={
+      sin:x=>Math.sin(r(x)),cos:x=>Math.cos(r(x)),tan:x=>Math.tan(r(x)),
+      asin:x=>d(Math.asin(x)),acos:x=>d(Math.acos(x)),atan:x=>d(Math.atan(x)),
+      sqrt:Math.sqrt,cbrt:Math.cbrt,log:Math.log10,ln:Math.log,fact,
+      PI:Math.PI,E:Math.E,ans};
+    const ex=teks.replace(/(\d+(?:\.\d+)?)!(?!=)/g,'fact($1)');
+    let h=Function(...Object.keys(f),'"use strict";return ('+ex+')')(...Object.values(f));
+    if(typeof h==='number'){
+      if(!isFinite(h)) throw 0;
+      h=parseFloat(h.toPrecision(12));
+    }
+    riw.unshift(cantik(teks)+' = '+h);
+    ans=h; teks=String(h);
+    $('hasil').textContent=h; $('ekspr').textContent='';
+    tampil();
+  }catch(e){
+    teks=''; $('hasil').textContent='Error'; $('ekspr').textContent='';
+  }
+}
+function tampil(){
+  $('riwayat').innerHTML=riw.length
+   ? riw.map(x=>'<li>'+x+'</li>').join('')
+   : '<li>Belum ada riwayat.</li>';
+}
+function hapus(){riw=[];tampil();}
+function salin(){
+  try{navigator.clipboard.writeText(String(ans));}catch(e){}
+}
 </script>
-</body>
-</html>
+</body></html>
